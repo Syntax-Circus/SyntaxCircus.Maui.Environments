@@ -36,7 +36,7 @@ public class AppEnvironmentSwitchCoordinatorTests
         var (coordinator, selector) = CreateCoordinator(currentKey: "uat");
         var invoked = false;
 
-        await coordinator.SwitchAsync("uat", (_, _) => { invoked = true; return Task.CompletedTask; });
+        await coordinator.SwitchAsync("uat", (_, _) => { invoked = true; return Task.CompletedTask; }, TestContext.Current.CancellationToken);
 
         invoked.ShouldBeFalse();
         await selector.DidNotReceive().SelectAsync(Arg.Any<string>(), Arg.Any<CancellationToken>());
@@ -48,7 +48,7 @@ public class AppEnvironmentSwitchCoordinatorTests
         var (coordinator, _) = CreateCoordinator(currentKey: "production");
         string? received = null;
 
-        await coordinator.SwitchAsync("uat", (key, _) => { received = key; return Task.CompletedTask; });
+        await coordinator.SwitchAsync("uat", (key, _) => { received = key; return Task.CompletedTask; }, TestContext.Current.CancellationToken);
 
         received.ShouldBe("uat");
     }
@@ -58,7 +58,7 @@ public class AppEnvironmentSwitchCoordinatorTests
     {
         var (coordinator, selector) = CreateCoordinator(currentKey: "production");
 
-        await coordinator.SwitchAsync("uat", (_, _) => Task.CompletedTask);
+        await coordinator.SwitchAsync("uat", (_, _) => Task.CompletedTask, TestContext.Current.CancellationToken);
 
         await selector.Received(1).SelectAsync("uat", Arg.Any<CancellationToken>());
     }
@@ -78,7 +78,7 @@ public class AppEnvironmentSwitchCoordinatorTests
     public async Task SwitchAsync_ConcurrentCalls_AreSerialized()
     {
         var (coordinator, selector) = CreateCoordinator(currentKey: "production");
-        var gate = new SemaphoreSlim(0, 1);
+        var gate = new SemaphoreSlim(0, 2);
         var concurrentCount = 0;
         var maxConcurrent = 0;
 
@@ -90,8 +90,8 @@ public class AppEnvironmentSwitchCoordinatorTests
             concurrentCount--;
         }
 
-        var first = coordinator.SwitchAsync("uat", OnSwitching);
-        var second = coordinator.SwitchAsync("uat", OnSwitching);
+        var first = coordinator.SwitchAsync("uat", OnSwitching, TestContext.Current.CancellationToken);
+        var second = coordinator.SwitchAsync("uat", OnSwitching, TestContext.Current.CancellationToken);
 
         gate.Release(2);
         await Task.WhenAll(first, second);

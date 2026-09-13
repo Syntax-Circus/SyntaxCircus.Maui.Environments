@@ -11,7 +11,7 @@ public interface IAppEnvironmentSelector
 {
     /// <summary>
     /// The currently selected environment's key. Falls back to the catalog's
-    /// <see cref="IAppEnvironmentCatalog.Default"/> if nothing has been selected yet, or if a
+    /// <see cref="IAppEnvironmentCatalog.DefaultEnvironment"/> if nothing has been selected yet, or if a
     /// previously-selected key no longer exists in the catalog (e.g. an app version removed it).
     /// </summary>
     string CurrentKey { get; }

@@ -163,7 +163,7 @@ Every public type in the package, for quick scanning by humans and AI agents ali
 | Member | Description |
 |---|---|
 | `IReadOnlyList<AppEnvironmentDescriptor> Environments` | All environments. |
-| `AppEnvironmentDescriptor Default` | The one with `IsDefault = true`. |
+| `AppEnvironmentDescriptor DefaultEnvironment` | The one with `IsDefault = true`. |
 
 `AppEnvironmentCatalog(IEnumerable<AppEnvironmentDescriptor> environments)` validates at construction: throws `ArgumentException` if the list is empty, keys aren't unique, or there isn't exactly one default.
 

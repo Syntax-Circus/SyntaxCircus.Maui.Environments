@@ -80,7 +80,7 @@ public class AppEnvironmentSelectorTests
     {
         var (selector, preferences) = CreateSelector();
 
-        await selector.SelectAsync("uat");
+        await selector.SelectAsync("uat", TestContext.Current.CancellationToken);
 
         preferences.Received(1).Set("syntaxcircus_app_environment", "uat", null);
         preferences.Received(1).Set("syntaxcircus_app_environment_selected_at", Arg.Any<string>(), null);
@@ -136,7 +136,7 @@ public class AppEnvironmentSelectorTests
         var selectedAt = DateTimeOffset.UtcNow.AddDays(-1).ToUnixTimeSeconds().ToString(System.Globalization.CultureInfo.InvariantCulture);
         preferences.Get("syntaxcircus_app_environment_selected_at", string.Empty, null).Returns(selectedAt);
 
-        var result = await selector.EnsureFreshAsync(TimeSpan.FromDays(7));
+        var result = await selector.EnsureFreshAsync(TimeSpan.FromDays(7), TestContext.Current.CancellationToken);
 
         result.ShouldBe("uat");
         preferences.DidNotReceive().Set("syntaxcircus_app_environment", Arg.Any<string>(), Arg.Any<string?>());
@@ -149,7 +149,7 @@ public class AppEnvironmentSelectorTests
         preferences.Get("syntaxcircus_app_environment", string.Empty, null).Returns("uat");
         preferences.Get("syntaxcircus_app_environment_selected_at", string.Empty, null).Returns(string.Empty);
 
-        var result = await selector.EnsureFreshAsync(TimeSpan.FromDays(7));
+        var result = await selector.EnsureFreshAsync(TimeSpan.FromDays(7), TestContext.Current.CancellationToken);
 
         result.ShouldBe("production");
         preferences.Received(1).Set("syntaxcircus_app_environment", "production", null);

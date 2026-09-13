@@ -18,7 +18,7 @@ public sealed class AppEnvironmentSelector(IAppEnvironmentCatalog catalog, IPref
             var stored = preferences.Get(KeyPreferenceKey, string.Empty);
             return !string.IsNullOrEmpty(stored) && catalog.Environments.Any(e => string.Equals(e.Key, stored, StringComparison.Ordinal))
                 ? stored
-                : catalog.Default.Key;
+                : catalog.DefaultEnvironment.Key;
         }
     }
 
@@ -35,7 +35,7 @@ public sealed class AppEnvironmentSelector(IAppEnvironmentCatalog catalog, IPref
 
     public bool HasExpired(TimeSpan ttl)
     {
-        if (string.Equals(CurrentKey, catalog.Default.Key, StringComparison.Ordinal))
+        if (string.Equals(CurrentKey, catalog.DefaultEnvironment.Key, StringComparison.Ordinal))
         {
             return false;
         }
@@ -61,8 +61,8 @@ public sealed class AppEnvironmentSelector(IAppEnvironmentCatalog catalog, IPref
     {
         if (HasExpired(ttl))
         {
-            await SelectAsync(catalog.Default.Key, cancellationToken).ConfigureAwait(false);
-            return catalog.Default.Key;
+            await SelectAsync(catalog.DefaultEnvironment.Key, cancellationToken).ConfigureAwait(false);
+            return catalog.DefaultEnvironment.Key;
         }
 
         return CurrentKey;

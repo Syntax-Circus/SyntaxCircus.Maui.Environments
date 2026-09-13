@@ -11,5 +11,5 @@ public interface IAppEnvironmentCatalog
     IReadOnlyList<AppEnvironmentDescriptor> Environments { get; }
 
     /// <summary>The single descriptor with <see cref="AppEnvironmentDescriptor.IsDefault"/> set.</summary>
-    AppEnvironmentDescriptor Default { get; }
+    AppEnvironmentDescriptor DefaultEnvironment { get; }
 }

@@ -11,7 +11,7 @@ public class AppEnvironmentCatalogTests
         var catalog = new AppEnvironmentCatalog([Production, Uat]);
 
         catalog.Environments.ShouldBe([Production, Uat]);
-        catalog.Default.ShouldBe(Production);
+        catalog.DefaultEnvironment.ShouldBe(Production);
     }
 
     [Fact]

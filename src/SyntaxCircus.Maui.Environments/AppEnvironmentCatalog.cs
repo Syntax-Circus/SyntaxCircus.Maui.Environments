@@ -9,7 +9,7 @@ public sealed class AppEnvironmentCatalog : IAppEnvironmentCatalog
 {
     public IReadOnlyList<AppEnvironmentDescriptor> Environments { get; }
 
-    public AppEnvironmentDescriptor Default { get; }
+    public AppEnvironmentDescriptor DefaultEnvironment { get; }
 
     public AppEnvironmentCatalog(IEnumerable<AppEnvironmentDescriptor> environments)
     {
@@ -33,6 +33,6 @@ public sealed class AppEnvironmentCatalog : IAppEnvironmentCatalog
         }
 
         Environments = list;
-        Default = defaults[0];
+        DefaultEnvironment = defaults[0];
     }
 }

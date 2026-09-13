@@ -15,7 +15,7 @@ public class UnknownDistributionChannelServiceTests
     {
         var service = new UnknownDistributionChannelService();
 
-        await service.InitializeAsync();
+        await service.InitializeAsync(TestContext.Current.CancellationToken);
 
         service.Current.ShouldBe(DistributionChannel.Unknown);
     }

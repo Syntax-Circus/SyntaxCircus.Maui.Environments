@@ -10,9 +10,15 @@ namespace SyntaxCircus.Maui.Environments;
 /// </summary>
 /// <remarks>
 /// This interface is intentionally separate from <see cref="IDistributionChannelService"/> so that
-/// <see cref="IosDistributionChannelService"/> degrades safely to
-/// <see cref="DistributionChannel.Unknown"/> when no implementation is registered, rather than the
-/// whole package depending on a native shim existing.
+/// <c>IosDistributionChannelService</c> degrades safely to <see cref="DistributionChannel.Unknown"/>
+/// when no implementation is registered, rather than the whole package depending on a native shim
+/// existing.
+///
+/// Deliberately declared here rather than under <c>Platforms/iOS</c> — despite only ever being
+/// implemented by an iOS-specific native shim, the interface itself has no iOS-specific types, and
+/// living in the shared, plain-<c>net10.0</c>-compiled part of the package lets
+/// <see cref="DistributionChannelDetection"/> (and its tests) reference it without pulling in the
+/// iOS workload.
 /// </remarks>
 public interface IAppTransactionEnvironmentProvider
 {
@@ -20,7 +26,10 @@ public interface IAppTransactionEnvironmentProvider
     /// Returns StoreKit's raw <c>AppStoreEnvironment</c> value — <c>"Production"</c>,
     /// <c>"Sandbox"</c>, or <c>"Xcode"</c> — or <see langword="null"/> if unavailable, unverified,
     /// or running below iOS 16 (where <c>AppTransaction</c> doesn't exist). Must not throw for any
-    /// of those expected cases; return <see langword="null"/> instead.
+    /// of those expected cases; return <see langword="null"/> instead. May throw
+    /// <see cref="TimeoutException"/> if the underlying native call doesn't complete within an
+    /// implementation-defined deadline, or <see cref="OperationCanceledException"/> if
+    /// <paramref name="cancellationToken"/> is signaled.
     /// </summary>
     Task<string?> GetEnvironmentAsync(CancellationToken cancellationToken = default);
 }

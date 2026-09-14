@@ -16,12 +16,22 @@ public sealed class AndroidDistributionChannelService : IDistributionChannelServ
     private const string GooglePlayInstallerPackageName = "com.android.vending";
 
     private DistributionChannel current = DistributionChannel.Unknown;
+    private DateTimeOffset? lastCheckedAt;
 
     public DistributionChannel Current => current;
+
+    public DateTimeOffset? LastCheckedAt => lastCheckedAt;
+
+    public DistributionChannelDetectionReason LastDetectionReason => lastCheckedAt is null
+        ? DistributionChannelDetectionReason.NotYetChecked
+        : current == DistributionChannel.Unknown
+            ? DistributionChannelDetectionReason.NoSignal
+            : DistributionChannelDetectionReason.Detected;
 
     public Task InitializeAsync(CancellationToken cancellationToken = default)
     {
         current = Detect();
+        lastCheckedAt = DateTimeOffset.UtcNow;
         return Task.CompletedTask;
     }
 

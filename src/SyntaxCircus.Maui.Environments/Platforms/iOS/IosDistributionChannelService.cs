@@ -10,41 +10,18 @@ namespace SyntaxCircus.Maui.Environments;
 public sealed class IosDistributionChannelService(IAppTransactionEnvironmentProvider? appTransactionEnvironmentProvider = null) : IDistributionChannelService
 {
     private DistributionChannel current = DistributionChannel.Unknown;
+    private DistributionChannelDetectionReason lastReason = DistributionChannelDetectionReason.NotYetChecked;
+    private DateTimeOffset? lastCheckedAt;
 
     public DistributionChannel Current => current;
 
+    public DateTimeOffset? LastCheckedAt => lastCheckedAt;
+
+    public DistributionChannelDetectionReason LastDetectionReason => lastReason;
+
     public async Task InitializeAsync(CancellationToken cancellationToken = default)
     {
-        current = await DetectAsync(cancellationToken).ConfigureAwait(false);
-    }
-
-    private async Task<DistributionChannel> DetectAsync(CancellationToken cancellationToken)
-    {
-        if (appTransactionEnvironmentProvider is null)
-        {
-            return DistributionChannel.Unknown;
-        }
-
-        string? environment;
-        try
-        {
-            environment = await appTransactionEnvironmentProvider.GetEnvironmentAsync(cancellationToken).ConfigureAwait(false);
-        }
-        catch (OperationCanceledException)
-        {
-            throw;
-        }
-        catch (Exception)
-        {
-            return DistributionChannel.Unknown;
-        }
-
-        return environment switch
-        {
-            "Xcode" => DistributionChannel.DebugOrLocal,
-            "Sandbox" => DistributionChannel.TestFlight,
-            "Production" => DistributionChannel.AppStore,
-            _ => DistributionChannel.Unknown,
-        };
+        (current, lastReason) = await DistributionChannelDetection.DetectAsync(appTransactionEnvironmentProvider, cancellationToken).ConfigureAwait(false);
+        lastCheckedAt = DateTimeOffset.UtcNow;
     }
 }

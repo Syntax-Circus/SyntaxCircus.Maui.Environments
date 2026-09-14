@@ -19,4 +19,20 @@ public class UnknownDistributionChannelServiceTests
 
         service.Current.ShouldBe(DistributionChannel.Unknown);
     }
+
+    [Fact]
+    public void LastCheckedAt_AlwaysNull()
+    {
+        var service = new UnknownDistributionChannelService();
+
+        service.LastCheckedAt.ShouldBeNull();
+    }
+
+    [Fact]
+    public void LastDetectionReason_AlwaysNotSupported()
+    {
+        var service = new UnknownDistributionChannelService();
+
+        service.LastDetectionReason.ShouldBe(DistributionChannelDetectionReason.NotSupported);
+    }
 }

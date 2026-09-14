@@ -9,5 +9,9 @@ public sealed class UnknownDistributionChannelService : IDistributionChannelServ
 {
     public DistributionChannel Current => DistributionChannel.Unknown;
 
+    public DateTimeOffset? LastCheckedAt => null;
+
+    public DistributionChannelDetectionReason LastDetectionReason => DistributionChannelDetectionReason.NotSupported;
+
     public Task InitializeAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
 }

@@ -4,9 +4,11 @@ namespace SyntaxCircus.Maui.Environments;
 /// The retry/timeout/failure-classification logic behind <c>IosDistributionChannelService</c>,
 /// pulled out of that iOS-only-compiled class so it can be unit-tested against a fake
 /// <see cref="IAppTransactionEnvironmentProvider"/> without the iOS workload. One retry on
-/// <see cref="DistributionChannelDetectionReason.Timeout"/>/<see cref="DistributionChannelDetectionReason.NativeError"/>
+/// <see cref="DistributionChannelDetectionReason.Timeout"/>/<see cref="DistributionChannelDetectionReason.NativeError"/>/<see cref="DistributionChannelDetectionReason.NoSignal"/>
 /// covers the known case of <c>AppTransaction.shared</c> being slow/unavailable in the moments right
-/// after a fresh TestFlight/App Store install.
+/// after a fresh TestFlight/App Store install - including when the underlying native call returns
+/// during that warm-up window but with an unverified/unusable result (surfaced as
+/// <see cref="DistributionChannelDetectionReason.NoSignal"/>) rather than timing out or throwing.
 /// </summary>
 public static class DistributionChannelDetection
 {
@@ -22,7 +24,7 @@ public static class DistributionChannelDetection
         }
 
         var result = await DetectOnceAsync(provider, cancellationToken).ConfigureAwait(false);
-        if (result.Reason is DistributionChannelDetectionReason.Timeout or DistributionChannelDetectionReason.NativeError)
+        if (result.Reason is DistributionChannelDetectionReason.Timeout or DistributionChannelDetectionReason.NativeError or DistributionChannelDetectionReason.NoSignal)
         {
             await Task.Delay(RetryDelay, cancellationToken).ConfigureAwait(false);
             result = await DetectOnceAsync(provider, cancellationToken).ConfigureAwait(false);

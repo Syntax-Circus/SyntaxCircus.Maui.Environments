@@ -27,7 +27,7 @@ public class DistributionChannelDetectionTests
     }
 
     [Fact]
-    public async Task DetectAsync_ProviderReturnsNull_ReturnsUnknownWithNoSignal()
+    public async Task DetectAsync_ProviderReturnsNullTwice_ReturnsUnknownWithNoSignalAfterOneRetry()
     {
         var provider = Substitute.For<IAppTransactionEnvironmentProvider>();
         provider.GetEnvironmentAsync(Arg.Any<CancellationToken>()).Returns(Task.FromResult<string?>(null));
@@ -36,6 +36,23 @@ public class DistributionChannelDetectionTests
 
         result.Channel.ShouldBe(DistributionChannel.Unknown);
         result.Reason.ShouldBe(DistributionChannelDetectionReason.NoSignal);
+        await provider.Received(2).GetEnvironmentAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task DetectAsync_ReturnsNullThenSucceeds_RetriesOnceAndReturnsSuccess()
+    {
+        var provider = Substitute.For<IAppTransactionEnvironmentProvider>();
+        provider.GetEnvironmentAsync(Arg.Any<CancellationToken>())
+            .Returns(
+                Task.FromResult<string?>(null),
+                Task.FromResult<string?>("Sandbox"));
+
+        var result = await DistributionChannelDetection.DetectAsync(provider, TestContext.Current.CancellationToken);
+
+        result.Channel.ShouldBe(DistributionChannel.TestFlight);
+        result.Reason.ShouldBe(DistributionChannelDetectionReason.Detected);
+        await provider.Received(2).GetEnvironmentAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]
